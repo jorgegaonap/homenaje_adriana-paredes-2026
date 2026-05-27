@@ -10,12 +10,13 @@
   body{background:#0d0c0b;color:#e8e2d8;font-family:'Jost',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
   body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");opacity:.35;pointer-events:none;z-index:0}
   .page{position:relative;z-index:1}
-  .hero{text-align:center;padding:40px 40px 28px;border-bottom:.5px solid rgba(255,255,255,.08);position:relative}
-  .hero::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:80px;height:1px;background:#c9a96e}
-  .eyebrow{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c9a96e;margin-bottom:20px}
-  .hero-name{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(48px,7vw,88px);line-height:1;color:#f0e8db}
+  .hero{display:flex;align-items:center;justify-content:center;gap:16px;padding:12px 40px 10px;border-bottom:.5px solid rgba(255,255,255,.08);position:relative}
+  .hero::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:60px;height:1px;background:#c9a96e}
+  .eyebrow{font-size:11px;letter-spacing:.15em;color:#c9a96e;white-space:nowrap}
+  .hero-divider{width:1px;height:28px;background:rgba(201,169,110,.3);flex-shrink:0}
+  .hero-name{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(28px,3.5vw,48px);line-height:1;color:#f0e8db}
   .hero-name em{font-style:italic;color:#c9a96e}
-  #gallery{padding:20px 40px 80px}
+  #gallery{padding:16px 40px 60px}
   .slideshow{max-width:1100px;margin:0 auto}
   .slide{display:none;animation:fi 1s ease}
   .slide.active{display:flex}
@@ -23,9 +24,6 @@
   .slide.side{flex-direction:row;gap:0}
   .slide.side .photo-col{flex-shrink:0;border-radius:8px 0 0 8px;overflow:hidden;background:#1a1714}
   .slide.side .msg-col{flex:1;border-radius:0 8px 8px 0;border:.5px solid rgba(255,255,255,.05);border-left:none}
-  .slide.bottom{flex-direction:column;gap:0}
-  .slide.bottom .photo-col{border-radius:8px 8px 0 0;overflow:hidden;background:#1a1714;width:100%}
-  .slide.bottom .msg-col{border-radius:0 0 8px 8px;border:.5px solid rgba(255,255,255,.05);border-top:none}
   .photo-col{position:relative}
   .photo-col img{width:100%;height:100%;object-fit:contain;display:block;filter:brightness(.92) saturate(.9);transition:transform 8s ease;background:#0d0c0b}
   .slide.active .photo-col img{transform:scale(1.04)}
@@ -38,17 +36,18 @@
   .signer{font-size:12px;letter-spacing:.12em;color:#c9a96e;text-transform:uppercase}
   .date{font-size:11px;color:rgba(232,226,216,.28);line-height:1.5}
   .group-badge{position:absolute;top:12px;right:12px;background:rgba(13,12,11,.7);border:.5px solid rgba(201,169,110,.35);border-radius:3px;padding:4px 10px;font-size:11px;letter-spacing:.15em;color:#c9a96e}
-  .nav-row{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:28px}
+  .nav-row{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:24px}
   .nav-btn{background:transparent;border:.5px solid rgba(201,169,110,.4);color:#c9a96e;padding:9px 26px;font-family:'Jost',sans-serif;font-weight:300;font-size:11px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .2s,border-color .2s}
   .nav-btn:hover{background:rgba(201,169,110,.1);border-color:#c9a96e}
   .nav-counter{font-family:'Cormorant Garamond',serif;font-size:17px;color:rgba(232,226,216,.35);min-width:70px;text-align:center}
-  .auto-label{margin-top:12px;text-align:center;font-size:10px;letter-spacing:.2em;color:rgba(232,226,216,.18);text-transform:uppercase}
+  .auto-label{margin-top:10px;text-align:center;font-size:10px;letter-spacing:.2em;color:rgba(232,226,216,.18);text-transform:uppercase}
 </style>
 </head>
 <body>
 <div class="page">
   <div class="hero">
     <p class="eyebrow">En su memoria</p>
+    <div class="hero-divider"></div>
     <h1 class="hero-name">Adriana <em>Paredes</em></h1>
   </div>
   <div id="gallery">
@@ -91,47 +90,27 @@ function detectOrientation(url) {
 
 function computeDimensions(orient) {
   const maxW = Math.min(window.innerWidth - 80, 1100);
-  if (orient.landscape) {
-    const maxH     = window.innerHeight * 0.75;
-    const naturalH = maxW / orient.ratio;
-    const fotoH    = Math.round(Math.min(naturalH, maxH));
-    return { layout: 'bottom', fotoH, msgH: 100 };
-  } else {
-    const maxH   = window.innerHeight * 0.75;
-    const frac   = orient.ratio < 0.55 ? 0.36 : orient.ratio < 0.75 ? 0.42 : 0.48;
-    const fotoW  = maxW * frac;
-    const slideH = Math.round(Math.min(fotoW / orient.ratio, maxH));
-    return { layout: 'side', photoWidthPct: Math.round(frac * 100), slideH };
-  }
+  const maxH = window.innerHeight * 0.80;
+  // Siempre texto al costado
+  const frac   = orient.landscape
+    ? (orient.ratio > 1.6 ? 0.65 : 0.58)
+    : (orient.ratio < 0.55 ? 0.36 : orient.ratio < 0.75 ? 0.42 : 0.48);
+  const fotoW  = maxW * frac;
+  const slideH = Math.round(Math.min(fotoW / orient.ratio, maxH));
+  return { layout: 'side', photoWidthPct: Math.round(frac * 100), slideH };
 }
 
-function msgFontSize(layout, text) {
+function msgFontSize(text) {
   if (!text) return '16px';
   const l = text.length;
-  if (layout === 'bottom')
-    return l < 80 ? 'clamp(16px,1.5vw,21px)' : l < 180 ? 'clamp(14px,1.3vw,18px)' : 'clamp(13px,1.1vw,15px)';
   return l < 80 ? 'clamp(17px,1.6vw,23px)' : l < 180 ? 'clamp(15px,1.4vw,20px)' : 'clamp(13px,1.2vw,16px)';
 }
 
 function buildSlide(s, i, dim) {
   const badge = s.groupTotal > 1 ? `<div class="group-badge">${s.groupIdx} / ${s.groupTotal}</div>` : '';
   const msgHTML = s.message
-    ? `<div class="qmark">&ldquo;</div><p class="msg-text" style="font-size:${msgFontSize(dim.layout, s.message)}">${s.message}</p>`
+    ? `<div class="qmark">&ldquo;</div><p class="msg-text" style="font-size:${msgFontSize(s.message)}">${s.message}</p>`
     : `<p class="msg-text empty" style="font-size:16px">— Con cariño —</p>`;
-
-  if (dim.layout === 'bottom') return `
-    <div class="slide bottom" id="s${i}" style="border-radius:8px;overflow:hidden">
-      <div class="photo-col" style="height:${dim.fotoH}px">
-        <img src="${s.photo}" alt="Recuerdo" onerror="this.style.opacity='.15'">${badge}
-      </div>
-      <div class="msg-col" style="min-height:${dim.msgH}px;flex-direction:row;align-items:center;gap:32px;padding:24px 36px">
-        <div class="msg-body">${msgHTML}</div>
-        <div style="flex-shrink:0;min-width:150px;text-align:right;border-left:.5px solid rgba(255,255,255,.08);padding-left:24px;display:flex;flex-direction:column;gap:6px">
-          <span class="signer">${s.signer||'Anónimo'}</span>
-          <span class="date">${s.date}</span>
-        </div>
-      </div>
-    </div>`;
 
   return `
     <div class="slide side" id="s${i}" style="height:${dim.slideH}px;border-radius:8px;overflow:hidden">
