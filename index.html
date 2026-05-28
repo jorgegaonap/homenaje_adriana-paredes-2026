@@ -88,13 +88,18 @@ function detectOrientation(url) {
   });
 }
 
-function computeDimensions(orient) {
+function computeDimensions(orient, msgLen) {
   const maxW = Math.min(window.innerWidth - 80, 1100);
   const maxH = window.innerHeight * 0.80;
-  // Siempre texto al costado
-  const frac   = orient.landscape
-    ? (orient.ratio > 1.6 ? 0.65 : 0.58)
-    : (orient.ratio < 0.55 ? 0.36 : orient.ratio < 0.75 ? 0.42 : 0.48);
+
+  // Ancho del texto según largo del mensaje: poco texto → columna angosta
+  const msgFrac = msgLen === 0  ? 0.18 :
+                  msgLen < 60   ? 0.22 :
+                  msgLen < 120  ? 0.28 :
+                  msgLen < 250  ? 0.34 : 0.40;
+
+  // Foto ocupa el resto
+  const frac   = 1 - msgFrac;
   const fotoW  = maxW * frac;
   const slideH = Math.round(Math.min(fotoW / orient.ratio, maxH));
   return { layout: 'side', photoWidthPct: Math.round(frac * 100), slideH };
@@ -133,7 +138,7 @@ async function render() {
   const ss = document.getElementById('ss');
   for (let i = 0; i < SLIDES.length; i++) {
     const orient = await detectOrientation(SLIDES[i].photo);
-    ss.insertAdjacentHTML('beforeend', buildSlide(SLIDES[i], i, computeDimensions(orient)));
+    ss.insertAdjacentHTML('beforeend', buildSlide(SLIDES[i], i, computeDimensions(orient, SLIDES[i].message.length)));
   }
   show(0); reset();
 }
